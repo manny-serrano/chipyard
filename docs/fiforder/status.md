@@ -1,11 +1,11 @@
 # FIFOrder current state
 
-Recorded 2026-11-10. No FIFOrder scheduler changes are in the tree.
+Recorded 2026-11-10. Synthesis results were added the same day. No FIFOrder scheduler changes are in the tree.
 BOOM v3 is the core under test. v4 sources are present and are not used by the configs below.
 
 ## Commits
 
-- Chipyard branch `fiforder-main`, before this note: `7f9ac35377b427a3f26050e89b621338237976f3`
+- Chipyard branch `fiforder-main`. The simulation note is `7061ed71`. The commit before that note is `7f9ac35377b427a3f26050e89b621338237976f3`
 - BOOM submodule `generators/boom`, branch `fiforder-main`: `ba03175e0a3cf5c0d5a7f14d385ac1c8998c4428`
 - BOOM working tree is clean. The earlier pointer in `baseline-commits.txt` (`a3d8de65`) is the commit before the Small baseline note.
 
@@ -52,8 +52,21 @@ Logs outside the repository:
 
 Program output is under `sims/verilator/output/chipyard.harness.TestHarness.MegaBoomV3Config/`.
 
+## Mega scheduler synthesis
+
+Standalone synthesis of the baseline INT and FP issue units. The BOOM sources and the Mega simulator binary were left unchanged. RTL for Yosys is in `sims/verilator/generated-src-yosys/`, separate from the simulator tree. Tools and the PDK are outside this repository, under `~/FIFOrder-project/synth-env` and `~/FIFOrder-project/sky130-pdk`.
+
+Hammer 1.2.0 and Yosys 0.69 map to Sky130 HD `sky130_fd_sc_hd`, corner `tt_025C_1v80` (1.80 V, 25 °C). OpenSTA 2.2.0 measures slack. The clock port is `clock`, period 20 ns, uncertainty 1 ns. Yosys `abc -D 20000` is that period in picoseconds and is the mapper target. Hammer does not report slack.
+
+Sky130 HD has no liberty match for the synchronous-reset flops, so a Yosys `dfflegalize` pass mapped those cells before the area and timing numbers below. Both checks report 0 problems. There are no memories in either netlist.
+
+- INT `IssueUnitCollapsing_2` plus `IssueSlot_32`, 40 slots: 185,524 cells, area 1,363,881.82 µm², pre-layout slack −32.37 ns.
+- FP `IssueUnitCollapsing` plus `IssueSlot`, 32 slots: 136,352 cells, area 1,017,363.23 µm², pre-layout slack −24.68 ns.
+
+Reports are under `~/FIFOrder-project/synth/int` and `~/FIFOrder-project/synth/fp`.
+
 ## Not done
 
 No hybrid scheduler, new counters, or new Chipyard configs exist.
 Medium, Large, and Giga simulators have not been built here.
-Area, timing, and power have not been measured. No PDK or synthesis tools are installed.
+Timing is pre-layout and misses the 20 ns period. Power has not been measured.
